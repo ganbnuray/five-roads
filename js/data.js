@@ -79,3 +79,13 @@ const FOUNDRY = {
   lat: 48.8636,
   lon: 2.3637
 };
+
+// who held a work after each step
+const STATUS_LABELS = {
+  studio: "With the artist or foundry",
+  agent: "With an agent (Loïe Fuller)",
+  market: "On the market (dealer, auction, unsold stock)",
+  alma: "Owned by Alma Spreckels",
+  loan: "Lent to the Legion (Alma still owns it)",
+  museum: "Owned by the museum"
+};

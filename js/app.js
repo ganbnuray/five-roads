@@ -102,6 +102,12 @@ function renderOverview() {
   });
 }
 
+function placeText(e) {
+  let text = e.place + (e.city ? ", " + e.city : "");
+  if (e.placeAccuracy && e.placeAccuracy !== "Exact address") text += ` (${e.placeAccuracy.toLowerCase()})`;
+  return text;
+}
+
 function renderWork() {
   const work = WORKS_BY_ID[state.work];
   const events = eventsByWork[state.work];
@@ -110,10 +116,19 @@ function renderWork() {
     <div>
       <h2><i>${escapeHtml(work.title)}</i></h2>
       <p class="cast">${escapeHtml(work.cast)}</p>
+      <div class="tomb">${tombstoneHtml(work)}</div>
     </div>
     <div class="step">
-      <p class="where">Step ${e.step} of ${events.length}, ${escapeHtml(e.date)}</p>
+      <div class="date"><span class="type">${escapeHtml(e.type)}</span><span>${escapeHtml(e.date)}</span></div>
       <p class="what">${escapeHtml(e.what)}.</p>
+      <dl class="details">
+        <dt>Where</dt><dd>${escapeHtml(placeText(e))}</dd>
+        <dt>Who</dt><dd>${escapeHtml(e.who)}</dd>
+        <dt>Context (our reading)</dt><dd>${escapeHtml(e.context)}</dd>
+        <dt>Source</dt><dd>${escapeHtml(e.source)}</dd>
+        <dt>Certainty</dt><dd>${escapeHtml(e.certainty)}</dd>
+        <dt>After this</dt><dd>${escapeHtml(STATUS_LABELS[e.status])}</dd>
+      </dl>
     </div>
     <p class="small"><a href="${work.museumPage}">See the museum record</a></p>`;
 }
