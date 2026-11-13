@@ -5,6 +5,7 @@ const HEIGHT = 620;
 
 const svg = d3.select("#map");
 const baseLayer = svg.append("g"); // land and borders, moved by the zoom
+const overlay = svg.append("g"); // routes and labels, redrawn after every zoom
 
 let projection;
 let currentTransform = d3.zoomIdentity;
@@ -14,6 +15,7 @@ const zoom = d3.zoom()
   .on("zoom", (event) => {
     currentTransform = event.transform;
     baseLayer.attr("transform", currentTransform);
+    drawMap(false);
   });
 
 function setupMap(world) {
@@ -100,4 +102,72 @@ function fitToEvents(events, minSize) {
 
 function overviewTransform() {
   return fitToEvents(allEvents, 1);
+}
+
+// turn a longitude and latitude into a point on screen, after zoom
+function project(lon, lat) {
+  const [x, y] = projection([lon, lat]);
+  return [currentTransform.applyX(x), currentTransform.applyY(y)];
+}
+
+// a gently bent line from point a to point b
+function curvePath(a, b) {
+  const dx = b[0] - a[0];
+  const dy = b[1] - a[1];
+  const bend = Math.hypot(dx, dy) > 200 ? 0.22 : 0.15;
+  const midX = (a[0] + b[0]) / 2 - dy * bend;
+  const midY = (a[1] + b[1]) / 2 + dx * bend;
+  return `M${a[0]},${a[1]} Q${midX},${midY} ${b[0]},${b[1]}`;
+}
+
+function drawMap(animate) {
+  overlay.selectAll("*").remove();
+  if (allEvents.length === 0) return; // data is still loading
+  const view = buildView(animate);
+  view.routes.forEach(drawRoute);
+}
+
+// decide which routes, markers and labels to show for the current mode
+function buildView(animate) {
+  const view = { routes: [], markers: [], labels: [] };
+
+  // overview: every route, and a marker where each work ends up
+  WORKS.forEach((work) => {
+    segmentsByWork[work.id].forEach((segment) => {
+      view.routes.push({ work: work.id, segment, style: "solid" });
+    });
+  });
+  return view;
+}
+
+const ROUTE_WIDTH = { ghost: 1, future: 1.5, past: 2, solid: 3, now: 4 };
+const ROUTE_OPACITY = { ghost: 0.18, future: 0.35, past: 0.4, solid: 0.9, now: 1 };
+
+function drawRoute(route) {
+  const color = WORKS_BY_ID[route.work].color;
+  const a = project(route.segment.from.lon, route.segment.from.lat);
+  const b = project(route.segment.to.lon, route.segment.to.lat);
+  const path = overlay.append("path")
+    .attr("d", curvePath(a, b))
+    .attr("fill", "none")
+    .attr("stroke", color)
+    .attr("stroke-linecap", "round")
+    .attr("stroke-width", ROUTE_WIDTH[route.style])
+    .attr("opacity", ROUTE_OPACITY[route.style]);
+  drawArrow(path, color, true);
+}
+
+// a small arrowhead at the end of a route
+function drawArrow(path, color, small) {
+  const node = path.node();
+  const length = node.getTotalLength();
+  if (length < 6) return;
+  const tip = node.getPointAtLength(length);
+  const before = node.getPointAtLength(Math.max(0, length - 8));
+  const angle = (Math.atan2(tip.y - before.y, tip.x - before.x) * 180) / Math.PI;
+  const size = small ? 6 : 9;
+  overlay.append("path")
+    .attr("d", `M0,0 L${-size * 1.6},${-size * 0.75} L${-size * 1.6},${size * 0.75} Z`)
+    .attr("fill", color)
+    .attr("transform", `translate(${tip.x},${tip.y}) rotate(${angle})`);
 }

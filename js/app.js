@@ -11,6 +11,7 @@ const state = {
 
 let allEvents = [];
 const eventsByWork = {};
+const segmentsByWork = {};
 
 // "1935-12-05" becomes about 1935.92, so dates can be compared and placed on a scale
 function yearOf(sortDate) {
@@ -28,7 +29,26 @@ function prepareEvents(events) {
     eventsByWork[work.id] = allEvents
       .filter((e) => e.work === work.id)
       .sort((a, b) => a.step - b.step);
+    segmentsByWork[work.id] = buildSegments(eventsByWork[work.id]);
   });
+}
+
+// a segment joins two steps in different places; a step at sea rides along with the next one
+function buildSegments(events) {
+  const segments = [];
+  let last = null;
+  let sea = null;
+  events.forEach((e) => {
+    if (!e.hasPlace) {
+      sea = e;
+      return;
+    }
+    const moved = last && (Math.abs(last.lat - e.lat) > 1e-4 || Math.abs(last.lon - e.lon) > 1e-4);
+    if (moved) segments.push({ from: last, to: e, sea });
+    sea = null;
+    last = e;
+  });
+  return segments;
 }
 
 // load the map shapes and the events, then draw the page
