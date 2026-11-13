@@ -9,6 +9,7 @@ const state = {
   mode: "overview",
   work: "thinker",
   step: 1,
+  roadOpen: false,
 };
 
 let allEvents = [];
@@ -134,7 +135,27 @@ function renderWork() {
         <dt>After this</dt><dd>${escapeHtml(STATUS_LABELS[e.status])}</dd>
       </dl>
     </div>
+    <details class="road" ${state.roadOpen ? "open" : ""}>
+      <summary>The whole road <span class="muted">(${events.length} steps)</span></summary>
+      <ul class="event-list">${events.map((x) => `
+        <li class="${x.uncertain ? "uncertain" : ""}">
+          <button data-step="${x.step}" ${x.step === state.step ? 'aria-current="step"' : ""}>
+            <span class="when">${escapeHtml(x.date)}</span>
+            <span class="text">${escapeHtml(x.what)}</span>
+          </button>
+        </li>`).join("")}
+      </ul>
+    </details>
     <p class="small"><a href="${work.museumPage}">See the museum record</a></p>`;
+
+  panel.querySelectorAll("[data-step]").forEach((button) => {
+    button.onclick = () => go("work", { work: state.work, step: Number(button.dataset.step) });
+  });
+  // remember if the list was open, so it stays open on the next step
+  const road = panel.querySelector(".road");
+  road.ontoggle = () => {
+    state.roadOpen = road.open;
+  };
 }
 
 function updateTabs() {
