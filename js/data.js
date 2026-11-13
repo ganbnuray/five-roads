@@ -192,3 +192,63 @@ const PERIODS = [
     ]
   }
 ];
+
+// quiz questions; "answer" is the index of the right option
+const QUIZ = [
+  {
+    question: "Where were all five of these bronzes cast?",
+    options: ["In Rodin's studio at Meudon", "At the Rudier foundry in Paris", "At a foundry in San Francisco", "At the Musée Rodin"],
+    answer: 1,
+    explanation: "All five, even Putnam's Tiger Love. Alma sent his plasters to the same Paris foundry Rodin used. Look for the ringed dot in Paris.",
+    showOnMap: { work: "tiger", step: 4 }
+  },
+  {
+    question: "Which two works were cast after Rodin died in 1917?",
+    options: ["The Thinker and The Prodigal Son", "Faun and Nymph and Polyphemus and Acis", "The Thinker and Tiger Love", "None of them"],
+    answer: 1,
+    explanation: "Faun and Nymph was cast in 1926 to 1927 and Polyphemus and Acis in 1929, ten years and more after his death. Both still count as works by Rodin.",
+    showOnMap: { work: "faun", step: 2 }
+  },
+  {
+    question: "After 1916, who held the right to make new Rodin bronzes?",
+    options: ["Loïe Fuller", "The French state, through the Musée Rodin", "Alma Spreckels", "Any foundry in Paris"],
+    answer: 1,
+    explanation: "In 1916 Rodin gave France his works and his casting rights. The Musée Rodin opened in 1919 and pays for itself by selling new casts.",
+    showOnMap: { work: "faun", step: 1 }
+  },
+  {
+    question: "Even The Thinker, cast while Rodin was alive, was not poured by Rodin. Who made it?",
+    options: ["Rodin's assistants at Meudon", "The Rudier foundry, from Rodin's plaster", "Loïe Fuller's workshop", "A foundry chosen by Alma"],
+    answer: 1,
+    explanation: "Rodin modeled the figure; the foundry cast the bronze from a plaster mold. Even a lifetime cast is a copy the artist approved.",
+    showOnMap: { work: "thinker", step: 1 }
+  },
+  {
+    question: "Why did Alma send Arthur Putnam's plasters to Paris in 1921?",
+    options: ["To sell them at auction", "To have them cast in bronze at Rodin's foundry", "To show them at the Musée Rodin", "To return them to a French owner"],
+    answer: 1,
+    explanation: "Plaster breaks easily, and the 1906 earthquake had already destroyed many of Putnam's models. Casting made his work last, in two full sets.",
+    showOnMap: { work: "tiger", step: 3 }
+  },
+  {
+    question: "The two lifetime casts found a buyer at the 1915 fair. What happened to Polyphemus and Acis, cast in 1929?",
+    options: ["It sold at once in Paris", "It sat unsold with New York dealers for about 14 years", "It was melted down in the war", "It stayed at the Musée Rodin"],
+    answer: 1,
+    explanation: "It reached New York in 1935, during the Depression, and found a buyer only in 1949. More copies did not mean more buyers.",
+    showOnMap: { work: "poly", step: 5 }
+  },
+  {
+    question: "During World War II, what happened to many public bronze statues in France?",
+    options: ["They were shipped to the United States", "They were melted down for metal", "They were hidden at the Musée Rodin", "They were cast again"],
+    answer: 1,
+    explanation: "From October 1941 the Vichy government melted about 1,500 to 1,750 public bronzes for the German war industry. The material that lets a sculpture be copied also lets it be destroyed. In San Francisco, Alma gave Faun and Nymph to the Legion in 1942.",
+    showOnMap: { work: "faun", step: 8 }
+  },
+  {
+    question: "Since 1956, how many casts of each Rodin model does French law allow, per size?",
+    options: ["One", "Eight", "Twelve", "No limit"],
+    answer: 2,
+    explanation: "Twelve. There was no legal limit yet when Polyphemus and Acis was cast in 1929; the cap came almost forty years after Rodin's death.",
+    showOnMap: { work: "poly", step: 2 }
+  }
+];
