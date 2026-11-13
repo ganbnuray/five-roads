@@ -126,6 +126,29 @@ a:focus-visible {
   line-height: 1.6;
 }
 
+.title {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 48px;
+  align-items: end;
+}
+
+.hero {
+  margin: 0;
+}
+
+.hero img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.hero figcaption {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
 /* map and side panel */
 .main {
   display: grid;
