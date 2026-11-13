@@ -12,6 +12,8 @@ const state = {
   roadOpen: false,
   playing: null,
   period: 0,
+  quizIndex: 0,
+  answers: [],
 };
 
 let allEvents = [];
@@ -205,6 +207,81 @@ function renderPeriod() {
   });
 }
 
+function renderQuiz() {
+  if (state.quizIndex >= QUIZ.length) {
+    renderScore();
+    return;
+  }
+  const q = QUIZ[state.quizIndex];
+  const answer = state.answers[state.quizIndex];
+  const answered = answer != null;
+  const isRight = answer === q.answer;
+
+  const options = q.options.map((option, i) => {
+    let className = "";
+    let mark = "";
+    if (answered && i === q.answer) {
+      className = "right";
+      mark = `<span class="mark" aria-label="correct">✓</span>`;
+    } else if (answered && i === answer) {
+      className = "wrong";
+      mark = `<span class="mark" aria-label="wrong">✕</span>`;
+    }
+    return `<button data-option="${i}" class="${className}" ${answered ? "disabled" : ""}>${mark}<span>${escapeHtml(option)}</span></button>`;
+  }).join("");
+
+  const lastQuestion = state.quizIndex + 1 === QUIZ.length;
+  const feedback = !answered ? "" : `
+    <div class="feedback ${isRight ? "ok" : "no"}">
+      <b>${isRight ? "✓ Right." : "✕ Not quite."}</b> ${escapeHtml(q.explanation)}
+    </div>
+    <div class="row">
+      <button class="btn primary" id="next-question">${lastQuestion ? "See my score" : "Next question"}</button>
+    </div>`;
+
+  panel.innerHTML = `
+    <p class="where">Question ${state.quizIndex + 1} of ${QUIZ.length}. Every answer is somewhere on the map.</p>
+    <h2>${escapeHtml(q.question)}</h2>
+    <div class="quiz-options">${options}</div>
+    ${feedback}`;
+
+  panel.querySelectorAll("[data-option]").forEach((button) => {
+    button.onclick = () => {
+      state.answers[state.quizIndex] = Number(button.dataset.option);
+      renderQuiz();
+    };
+  });
+  const next = panel.querySelector("#next-question");
+  if (next) {
+    next.onclick = () => {
+      state.quizIndex += 1;
+      renderQuiz();
+    };
+  }
+}
+
+function renderScore() {
+  const score = QUIZ.filter((q, i) => state.answers[i] === q.answer).length;
+  const rows = QUIZ.map((q, i) => {
+    const right = state.answers[i] === q.answer;
+    return `<li>
+      <span class="${right ? "score-right" : "score-wrong"}">${right ? "✓ Right" : "✕ Missed"}</span>
+      <span>${escapeHtml(q.question)}</span>
+    </li>`;
+  }).join("");
+
+  panel.innerHTML = `
+    <h2>You got ${score} of ${QUIZ.length}</h2>
+    <ul class="score-list">${rows}</ul>
+    <div class="row"><button class="btn primary" id="try-again">Try again</button></div>`;
+
+  panel.querySelector("#try-again").onclick = () => {
+    state.quizIndex = 0;
+    state.answers = [];
+    renderQuiz();
+  };
+}
+
 function updateTabs() {
   ["overview", "period", "work", "quiz"].forEach((mode) => {
     document.getElementById("tab-" + mode).setAttribute("aria-pressed", String(state.mode === mode));
@@ -244,7 +321,8 @@ function go(mode, options = {}) {
   updateControls();
 
   if (mode === "overview" || mode === "quiz") {
-    renderOverview();
+    if (mode === "quiz") renderQuiz();
+    else renderOverview();
     moveMapTo(overviewTransform(), () => drawMap(false));
     return;
   }
@@ -294,6 +372,9 @@ function updateControls() {
   play.textContent = state.playing ? "Pause" : "Play";
   updateEraTag();
   updateYearBar();
+
+  // there is nothing to step through during the quiz
+  document.querySelector(".map-controls").style.display = state.mode === "quiz" ? "none" : "";
 }
 
 function step(direction) {
@@ -409,6 +490,10 @@ document.getElementById("tab-work").onclick = () => {
 document.getElementById("tab-period").onclick = () => {
   stopPlaying();
   go("period", { period: state.period });
+};
+document.getElementById("tab-quiz").onclick = () => {
+  stopPlaying();
+  go("quiz");
 };
 
 // back and next buttons, and the arrow keys
