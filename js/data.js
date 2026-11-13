@@ -94,3 +94,7 @@ const STATUS_LABELS = {
   loan: "Lent to the Legion (Alma still owns it)",
   museum: "Owned by the museum"
 };
+
+// key dates as decimal years, used by the era tag and the year bar
+const RODIN_DEATH = 1917.88; // november 17, 1917
+const PUTNAM_DEATH = 1930.4; // 1930

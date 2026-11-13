@@ -615,3 +615,20 @@ a:focus-visible {
   font-size: 14px;
   color: var(--muted);
 }
+
+.era {
+  padding: 5px 12px;
+  margin-right: 4px;
+  border-radius: 999px;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.era.alive {
+  background: var(--page);
+}
+
+.era.after {
+  background: var(--ink);
+  color: #fff;
+}

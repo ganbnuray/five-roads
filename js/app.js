@@ -219,6 +219,7 @@ function updateControls() {
   const play = document.getElementById("play");
   play.disabled = state.mode !== "work";
   play.textContent = state.playing ? "Pause" : "Play";
+  updateEraTag();
 }
 
 function step(direction) {
@@ -243,6 +244,25 @@ function togglePlay() {
   }
   state.playing = setInterval(() => step(1), 4200);
   updateControls();
+}
+
+function updateEraTag() {
+  const tag = document.getElementById("era");
+  let text = "";
+  if (state.mode === "work") {
+    const year = eventsByWork[state.work].find((e) => e.step === state.step).year;
+    if (state.work === "tiger") {
+      text = year < PUTNAM_DEATH ? "Putnam alive" : "After Putnam's death";
+    } else if (year < RODIN_DEATH) {
+      text = "Rodin alive";
+    } else {
+      const years = Math.floor(year - RODIN_DEATH);
+      text = years < 1 ? "Rodin has just died" : `${years} years after Rodin's death`;
+    }
+  }
+  tag.textContent = text;
+  tag.style.display = text ? "" : "none";
+  tag.className = "era " + (text.includes("alive") ? "alive" : "after");
 }
 
 // menu
