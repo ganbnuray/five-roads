@@ -62,10 +62,20 @@ function renderMapKey() {
   ).join("");
 }
 
+function renderWorkList() {
+  const list = document.getElementById("work-list");
+  list.innerHTML = WORKS.map((work) => `
+    <button class="work-link" data-work="${work.id}" aria-pressed="${state.mode === "work" && state.work === work.id}">
+      <span class="arrow" aria-hidden="true">&rarr;</span>
+      <span class="name">${escapeHtml(work.title)}</span>
+    </button>`).join("");
+}
+
 // load the map shapes and the events, then draw the page
 Promise.all([d3.json(WORLD_URL), d3.json("data/events.json")]).then(([world, events]) => {
   setupMap(world);
   prepareEvents(events);
   renderMapKey();
   svg.call(zoom.transform, overviewTransform());
+  renderWorkList();
 });
