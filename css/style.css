@@ -714,3 +714,26 @@ a:focus-visible {
   font-weight: 600;
   color: var(--ink);
 }
+
+/* events elsewhere in the world, in period mode */
+.world {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 15px;
+}
+
+.world li {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 12px;
+}
+
+.world b {
+  font-weight: 400;
+  font-size: 13.5px;
+  color: var(--muted);
+}

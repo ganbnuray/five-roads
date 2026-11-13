@@ -154,6 +154,7 @@ function drawMap(animate) {
 function buildView(animate) {
   const view = { routes: [], markers: [], labels: [] };
   if (state.mode === "work") return buildWorkView(view, animate);
+  if (state.mode === "period") return buildPeriodView(view, animate);
 
   // overview: every route, and a marker where each work ends up
   WORKS.forEach((work) => {
@@ -195,6 +196,30 @@ function buildWorkView(view, animate) {
     view.markers.push({ work: state.work, event: here, size: current.hasPlace ? 8 : 6, ring: true });
     view.labels.push(here);
   }
+  return view;
+}
+
+function buildPeriodView(view, animate) {
+  const period = PERIODS[state.period];
+
+  WORKS.forEach((work) => {
+    segmentsByWork[work.id].forEach((segment) => {
+      if (segment.to.year < period.start) {
+        view.routes.push({ work: work.id, segment, style: "past" });
+      } else if (inPeriod(segment.to, period)) {
+        view.routes.push({ work: work.id, segment, style: "now", animate });
+      }
+    });
+
+    const place = locationAt(work.id, period.end + 1);
+    const movedNow = eventsByWork[work.id].some((e) => inPeriod(e, period));
+    if (place) view.markers.push({ work: work.id, event: place, size: 7, ring: movedNow });
+  });
+
+  // one label for each place with an event in this period
+  const places = new Map();
+  allEvents.filter((e) => e.hasPlace && inPeriod(e, period)).forEach((e) => places.set(e.place, e));
+  view.labels = [...places.values()];
   return view;
 }
 

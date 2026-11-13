@@ -11,6 +11,7 @@ const state = {
   step: 1,
   roadOpen: false,
   playing: null,
+  period: 0,
 };
 
 let allEvents = [];
@@ -53,6 +54,19 @@ function buildSegments(events) {
     last = e;
   });
   return segments;
+}
+
+// where a work was at a given time
+function locationAt(workId, year) {
+  let place = null;
+  eventsByWork[workId].forEach((e) => {
+    if (e.year <= year && e.hasPlace) place = e;
+  });
+  return place;
+}
+
+function inPeriod(e, period) {
+  return e.year >= period.start && e.year < period.end + 1;
 }
 
 function escapeHtml(text) {
@@ -159,6 +173,38 @@ function renderWork() {
   };
 }
 
+function renderPeriod() {
+  const period = PERIODS[state.period];
+  const events = allEvents.filter((e) => inPeriod(e, period)).sort((a, b) => a.year - b.year);
+
+  const world = period.world.map((item) =>
+    `<li><b>${escapeHtml(item.date)}</b><span>${escapeHtml(item.text)}</span></li>`
+  ).join("");
+
+  const moves = events.map((e) => `
+    <li>
+      <button data-work="${e.work}" data-step="${e.step}">
+        <span class="when">${escapeHtml(e.date)}</span>
+        <span class="text"><i>${escapeHtml(WORKS_BY_ID[e.work].shortTitle)}</i>. ${escapeHtml(e.what)}</span>
+      </button>
+    </li>`).join("");
+
+  panel.innerHTML = `
+    <div>
+      <p class="where">${escapeHtml(period.years)}</p>
+      <h2>${escapeHtml(period.title)}</h2>
+    </div>
+    <p class="small">${escapeHtml(period.text)}</p>
+    <h3>Elsewhere in these years</h3>
+    <ul class="world">${world}</ul>
+    <h3>The five works</h3>
+    ${events.length ? `<ul class="event-list">${moves}</ul>` : `<p class="small muted">No recorded moves in this period.</p>`}`;
+
+  panel.querySelectorAll("[data-step]").forEach((button) => {
+    button.onclick = () => go("work", { work: button.dataset.work, step: Number(button.dataset.step) });
+  });
+}
+
 function updateTabs() {
   ["overview", "period", "work", "quiz"].forEach((mode) => {
     document.getElementById("tab-" + mode).setAttribute("aria-pressed", String(state.mode === mode));
@@ -174,9 +220,23 @@ function workStepPoints() {
   return [previous, current, next];
 }
 
+// every place a work moved to in this period, plus where each work stands at its end
+function periodPoints(period) {
+  const points = [];
+  WORKS.forEach((work) => {
+    segmentsByWork[work.id].forEach((segment) => {
+      if (inPeriod(segment.to, period)) points.push(segment.from, segment.to);
+    });
+    const place = locationAt(work.id, period.end + 1);
+    if (place) points.push(place);
+  });
+  return points;
+}
+
 // switch to a mode, then move the map and redraw
 function go(mode, options = {}) {
   state.mode = mode;
+  if (options.period != null) state.period = options.period;
   if (options.work) state.work = options.work;
   if (options.step != null) state.step = options.step;
   updateTabs();
@@ -190,6 +250,10 @@ function go(mode, options = {}) {
   }
 
   let target;
+  if (mode === "period") {
+    renderPeriod();
+    target = fitToEvents(periodPoints(PERIODS[state.period]), 0.5);
+  }
   if (mode === "work") {
     renderWork();
     target = fitToEvents(workStepPoints(), 0.12);
@@ -206,6 +270,15 @@ function updateControls() {
   let status = "";
   let canGoBack = false;
   let canGoNext = false;
+  if (state.mode === "overview") {
+    status = "1904 to 1950";
+    canGoNext = true;
+  }
+  if (state.mode === "period") {
+    status = `Period ${state.period + 1} of ${PERIODS.length}`;
+    canGoBack = state.period > 0;
+    canGoNext = state.period < PERIODS.length - 1;
+  }
   if (state.mode === "work") {
     const total = eventsByWork[state.work].length;
     status = `Step ${state.step} of ${total}`;
@@ -217,13 +290,23 @@ function updateControls() {
   document.getElementById("next").disabled = !canGoNext;
 
   const play = document.getElementById("play");
-  play.disabled = state.mode !== "work";
+  play.disabled = state.mode === "quiz";
   play.textContent = state.playing ? "Pause" : "Play";
   updateEraTag();
   updateYearBar();
 }
 
 function step(direction) {
+  if (state.mode === "overview" && direction > 0) {
+    go("period", { period: 0 });
+    return;
+  }
+  if (state.mode === "period") {
+    const next = state.period + direction;
+    if (next >= 0 && next < PERIODS.length) go("period", { period: next });
+    else stopPlaying();
+    return;
+  }
   if (state.mode === "work") {
     const next = state.step + direction;
     if (next >= 1 && next <= eventsByWork[state.work].length) go("work", { work: state.work, step: next });
@@ -243,7 +326,10 @@ function togglePlay() {
     stopPlaying();
     return;
   }
-  state.playing = setInterval(() => step(1), 4200);
+  if (state.mode === "overview") go("period", { period: 0 });
+  // periods have more to read, so they stay on screen longer
+  const delay = state.mode === "period" ? 6500 : 4200;
+  state.playing = setInterval(() => step(1), delay);
   updateControls();
 }
 
@@ -260,6 +346,11 @@ function updateEraTag() {
       const years = Math.floor(year - RODIN_DEATH);
       text = years < 1 ? "Rodin has just died" : `${years} years after Rodin's death`;
     }
+  }
+  if (state.mode === "period") {
+    if (state.period === 0) text = "Rodin alive";
+    else if (state.period === 1) text = "Rodin dies, Nov 1917";
+    else text = "After Rodin's death";
   }
   tag.textContent = text;
   tag.style.display = text ? "" : "none";
@@ -296,6 +387,14 @@ function updateYearBar() {
     dot.style.left = yearBarPosition(e.year) + "%";
     label.textContent = e.date;
   }
+  if (state.mode === "period") {
+    const period = PERIODS[state.period];
+    dot.style.display = "none";
+    span.style.display = "";
+    span.style.left = yearBarPosition(period.start) + "%";
+    span.style.width = yearBarPosition(period.end + 1) - yearBarPosition(period.start) + "%";
+    label.textContent = period.years;
+  }
 }
 
 // menu
@@ -306,6 +405,10 @@ document.getElementById("tab-overview").onclick = () => {
 document.getElementById("tab-work").onclick = () => {
   stopPlaying();
   go("work", { work: state.work, step: state.step });
+};
+document.getElementById("tab-period").onclick = () => {
+  stopPlaying();
+  go("period", { period: state.period });
 };
 
 // back and next buttons, and the arrow keys
