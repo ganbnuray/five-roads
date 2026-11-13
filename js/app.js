@@ -14,6 +14,7 @@ const state = {
   period: 0,
   quizIndex: 0,
   answers: [],
+  fromQuiz: false,
 };
 
 let allEvents = [];
@@ -131,6 +132,7 @@ function renderWork() {
   const events = eventsByWork[state.work];
   const e = events.find((x) => x.step === state.step);
   panel.innerHTML = `
+    ${state.fromQuiz ? `<div class="row"><button class="btn" id="back-to-quiz">&larr; Back to the quiz</button></div>` : ""}
     <figure class="photo">
       <img src="${work.photo}" alt="${escapeHtml(work.title)}, bronze, Legion of Honor">
       <figcaption>Photo: Fine Arts Museums of San Francisco</figcaption>
@@ -173,6 +175,8 @@ function renderWork() {
   road.ontoggle = () => {
     state.roadOpen = road.open;
   };
+  const back = panel.querySelector("#back-to-quiz");
+  if (back) back.onclick = () => go("quiz");
 }
 
 function renderPeriod() {
@@ -236,6 +240,7 @@ function renderQuiz() {
       <b>${isRight ? "✓ Right." : "✕ Not quite."}</b> ${escapeHtml(q.explanation)}
     </div>
     <div class="row">
+      <button class="btn" id="show-on-map">Show me on the map</button>
       <button class="btn primary" id="next-question">${lastQuestion ? "See my score" : "Next question"}</button>
     </div>`;
 
@@ -258,6 +263,8 @@ function renderQuiz() {
       renderQuiz();
     };
   }
+  const show = panel.querySelector("#show-on-map");
+  if (show) show.onclick = () => showQuestionOnMap(q);
 }
 
 function renderScore() {
@@ -265,21 +272,31 @@ function renderScore() {
   const rows = QUIZ.map((q, i) => {
     const right = state.answers[i] === q.answer;
     return `<li>
-      <span class="${right ? "score-right" : "score-wrong"}">${right ? "✓ Right" : "✕ Missed"}</span>
-      <span>${escapeHtml(q.question)}</span>
+      <button data-question="${i}">
+        <span class="when ${right ? "score-right" : "score-wrong"}">${right ? "✓ Right" : "✕ Missed"}</span>
+        <span class="text">${escapeHtml(q.question)}</span>
+      </button>
     </li>`;
   }).join("");
 
   panel.innerHTML = `
     <h2>You got ${score} of ${QUIZ.length}</h2>
-    <ul class="score-list">${rows}</ul>
+    <p class="small">Open any question to see where it happened on the map.</p>
+    <ul class="event-list">${rows}</ul>
     <div class="row"><button class="btn primary" id="try-again">Try again</button></div>`;
 
+  panel.querySelectorAll("[data-question]").forEach((button) => {
+    button.onclick = () => showQuestionOnMap(QUIZ[Number(button.dataset.question)]);
+  });
   panel.querySelector("#try-again").onclick = () => {
     state.quizIndex = 0;
     state.answers = [];
     renderQuiz();
   };
+}
+
+function showQuestionOnMap(q) {
+  go("work", { work: q.showOnMap.work, step: q.showOnMap.step, fromQuiz: true });
 }
 
 function updateTabs() {
@@ -312,6 +329,7 @@ function periodPoints(period) {
 
 // switch to a mode, then move the map and redraw
 function go(mode, options = {}) {
+  state.fromQuiz = mode === "work" && Boolean(options.fromQuiz);
   state.mode = mode;
   if (options.period != null) state.period = options.period;
   if (options.work) state.work = options.work;
@@ -390,7 +408,9 @@ function step(direction) {
   }
   if (state.mode === "work") {
     const next = state.step + direction;
-    if (next >= 1 && next <= eventsByWork[state.work].length) go("work", { work: state.work, step: next });
+    if (next >= 1 && next <= eventsByWork[state.work].length) {
+      go("work", { work: state.work, step: next, fromQuiz: state.fromQuiz });
+    }
     else stopPlaying();
   }
 }
