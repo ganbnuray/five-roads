@@ -12,6 +12,7 @@ const WORKS = [
     cast: "Cast in Rodin's lifetime, ca. 1904",
     summary: "Bought through Rodin's agent at a world's fair.",
     tombstone: "Auguste Rodin, The Thinker (modeled ca. 1880, enlarged 1902–1904, cast ca. 1904). Bronze, 72 x 38 x 54 in. (182.9 x 96.5 x 137.2 cm). Legion of Honor, Fine Arts Museums of San Francisco, San Francisco. Acc. 1924.18.1.",
+    photo: "img/thinker.webp",
     museumPage: "https://www.famsf.org/artworks/the-thinker"
   },
   {
@@ -23,6 +24,7 @@ const WORKS = [
     cast: "Cast in Rodin's lifetime, 1913",
     summary: "Same 1915 road, then 16 years on loan.",
     tombstone: "Auguste Rodin, The Prodigal Son (modeled ca. 1887, cast 1913). Bronze, 54 x 25 x 37 3/8 in. (137.2 x 63.5 x 94.9 cm). Legion of Honor, Fine Arts Museums of San Francisco, San Francisco. Acc. 1940.137.",
+    photo: "img/prodigal.webp",
     museumPage: "https://www.famsf.org/artworks/the-prodigal-son-89897"
   },
   {
@@ -34,6 +36,7 @@ const WORKS = [
     cast: "Cast after Rodin's death, 1926 to 1927",
     summary: "Resold at a Paris auction during the Depression.",
     tombstone: "Auguste Rodin, Faun and Nymph (modeled ca. 1886, cast ca. 1926–1927). Bronze, 12 7/8 x 8 1/2 x 11 11/16 in. (32.7 x 21.6 x 29.7 cm). Legion of Honor, Fine Arts Museums of San Francisco, San Francisco. Acc. 1942.42.",
+    photo: "img/faun.webp",
     museumPage: "https://www.famsf.org/artworks/faun-and-nymph"
   },
   {
@@ -45,6 +48,7 @@ const WORKS = [
     cast: "Cast after Rodin's death, 1929",
     summary: "Fourteen years unsold in New York.",
     tombstone: "Auguste Rodin, Polyphemus and Acis (modeled 1888, cast 1929). Bronze, 11 1/8 x 5 7/8 x 8 7/8 in. (28.3 x 14.9 x 22.5 cm). Legion of Honor, Fine Arts Museums of San Francisco, San Francisco. Acc. 1950.58.",
+    photo: "img/poly.webp",
     museumPage: "https://www.famsf.org/artworks/polyphemus-and-acis"
   },
   {
@@ -56,6 +60,7 @@ const WORKS = [
     cast: "Cast ca. 1921 to 1924 from Putnam's plaster, paid for by Alma",
     summary: "A California artist's plaster, sent to Rodin's foundry.",
     tombstone: "Arthur Putnam, Tiger Love (ca. 1917–1924). Bronze, 6 1/2 x 7 x 12 1/2 in. (16.5 x 17.8 x 31.8 cm). Legion of Honor, Fine Arts Museums of San Francisco, San Francisco. Acc. 1924.118.",
+    photo: "img/tiger.webp",
     museumPage: "https://www.famsf.org/artworks/tiger-love"
   }
 ];

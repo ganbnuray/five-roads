@@ -113,6 +113,10 @@ function renderWork() {
   const events = eventsByWork[state.work];
   const e = events.find((x) => x.step === state.step);
   panel.innerHTML = `
+    <figure class="photo">
+      <img src="${work.photo}" alt="${escapeHtml(work.title)}, bronze, Legion of Honor">
+      <figcaption>Photo: Fine Arts Museums of San Francisco</figcaption>
+    </figure>
     <div>
       <h2><i>${escapeHtml(work.title)}</i></h2>
       <p class="cast">${escapeHtml(work.cast)}</p>
