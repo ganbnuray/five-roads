@@ -60,5 +60,44 @@ document.getElementById("zoom-out").onclick = () => {
 };
 
 document.getElementById("zoom-reset").onclick = () => {
-  svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity);
+  svg.transition().duration(500).call(zoom.transform, overviewTransform());
 };
+
+// find the zoom that shows all the given events
+function fitToEvents(events, minSize) {
+  const points = events.filter((e) => e && e.hasPlace);
+  if (points.length === 0) return d3.zoomIdentity;
+
+  let west = d3.min(points, (e) => e.lon);
+  let east = d3.max(points, (e) => e.lon);
+  let south = d3.min(points, (e) => e.lat);
+  let north = d3.max(points, (e) => e.lat);
+
+  // give a single place some room around it
+  if (east - west < minSize) {
+    const middle = (west + east) / 2;
+    west = middle - minSize / 2;
+    east = middle + minSize / 2;
+  }
+  if (north - south < minSize * 0.6) {
+    const middle = (north + south) / 2;
+    south = middle - minSize * 0.3;
+    north = middle + minSize * 0.3;
+  }
+
+  const topLeft = projection([west, north]);
+  const bottomRight = projection([east, south]);
+  const boxWidth = Math.max(1, bottomRight[0] - topLeft[0]);
+  const boxHeight = Math.max(1, bottomRight[1] - topLeft[1]);
+  const scale = Math.max(0.85, Math.min(220, 0.62 * Math.min(WIDTH / boxWidth, HEIGHT / boxHeight)));
+  const centerX = (topLeft[0] + bottomRight[0]) / 2;
+  const centerY = (topLeft[1] + bottomRight[1]) / 2;
+
+  return d3.zoomIdentity
+    .translate(WIDTH / 2 - scale * centerX, HEIGHT / 2 - scale * centerY)
+    .scale(scale);
+}
+
+function overviewTransform() {
+  return fitToEvents(allEvents, 1);
+}
