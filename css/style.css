@@ -459,3 +459,18 @@ a:focus-visible {
   margin: 0;
   padding: 2px 0 10px;
 }
+
+.pulse {
+  animation: pulse 1.6s ease-out infinite;
+}
+
+@keyframes pulse {
+  0% {
+    r: 8;
+    opacity: 0.7;
+  }
+  100% {
+    r: 22;
+    opacity: 0;
+  }
+}

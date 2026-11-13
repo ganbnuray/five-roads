@@ -10,6 +10,7 @@ const overlay = svg.append("g"); // routes and labels, redrawn after every zoom
 let projection;
 let currentTransform = d3.zoomIdentity;
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+let hideNewRoutes = false; // keeps a new route hidden until the map stops moving
 
 const zoom = d3.zoom()
   .scaleExtent([0.85, 220])
@@ -174,7 +175,7 @@ function buildWorkView(view, animate) {
     if (segment.to.step < state.step) style = "solid";
     // a step at sea belongs to the segment it crosses
     if (segment.to.step === state.step || (!current.hasPlace && segment.sea === current)) style = "now";
-    view.routes.push({ work: state.work, segment, style });
+    view.routes.push({ work: state.work, segment, style, animate: style === "now" && animate });
   });
 
   // the other works stay faintly in the background
@@ -201,6 +202,8 @@ const ROUTE_WIDTH = { ghost: 1, future: 1.5, past: 2, solid: 3, now: 4 };
 const ROUTE_OPACITY = { ghost: 0.18, future: 0.35, past: 0.4, solid: 0.9, now: 1 };
 
 function drawRoute(route) {
+  if (route.style === "now" && hideNewRoutes && !route.animate) return;
+
   const color = WORKS_BY_ID[route.work].color;
   const a = project(route.segment.from.lon, route.segment.from.lat);
   const b = project(route.segment.to.lon, route.segment.to.lat);
@@ -213,12 +216,27 @@ function drawRoute(route) {
     .attr("opacity", ROUTE_OPACITY[route.style]);
 
   // dotted for steps still to come, dashed for uncertain moves
-  if (route.style === "future") {
-    path.attr("stroke-dasharray", "2 5");
-  } else if (route.segment.to.uncertain) {
-    path.attr("stroke-dasharray", "7 6");
+  let dash = null;
+  if (route.style === "future") dash = "2 5";
+  else if (route.segment.to.uncertain) dash = "7 6";
+
+  const length = path.node().getTotalLength();
+  if (route.animate && !reduceMotion && length > 4) {
+    // draw the line from start to end, then add the arrow
+    path.attr("stroke-dasharray", `${length} ${length}`)
+      .attr("stroke-dashoffset", length)
+      .transition()
+      .duration(Math.min(2200, 700 + length * 1.4))
+      .ease(d3.easeCubicInOut)
+      .attr("stroke-dashoffset", 0)
+      .on("end", () => {
+        path.attr("stroke-dasharray", dash);
+        drawArrow(path, color, false);
+      });
+  } else {
+    path.attr("stroke-dasharray", dash);
+    if (route.style === "now" || route.style === "solid") drawArrow(path, color, route.style === "solid");
   }
-  if (route.style === "now" || route.style === "solid") drawArrow(path, color, route.style === "solid");
   if (route.style === "now" && route.segment.sea) drawSeaLabel(path);
 }
 
@@ -306,6 +324,16 @@ function drawMarkers(markers) {
 
   markers.forEach((m) => {
     const work = WORKS_BY_ID[m.work];
+    if (m.ring && !reduceMotion) {
+      overlay.append("circle")
+        .attr("class", "pulse")
+        .attr("cx", m.point[0])
+        .attr("cy", m.point[1])
+        .attr("r", 8)
+        .attr("fill", "none")
+        .attr("stroke", work.color)
+        .attr("stroke-width", 2);
+    }
     const dot = overlay.append("circle")
       .attr("cx", m.point[0])
       .attr("cy", m.point[1])

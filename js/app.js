@@ -167,7 +167,12 @@ function go(mode, options = {}) {
     renderWork();
     target = fitToEvents(workStepPoints(), 0.12);
   }
-  moveMapTo(target, () => drawMap(false));
+  // hide the new route while the map moves, then draw it in
+  hideNewRoutes = true;
+  moveMapTo(target, () => {
+    hideNewRoutes = false;
+    drawMap(true);
+  });
 }
 
 // menu
