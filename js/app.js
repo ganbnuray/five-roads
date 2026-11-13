@@ -51,9 +51,21 @@ function buildSegments(events) {
   return segments;
 }
 
+function escapeHtml(text) {
+  const replacements = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" };
+  return String(text ?? "").replace(/[&<>"]/g, (c) => replacements[c]);
+}
+
+function renderMapKey() {
+  document.querySelector(".key-works").innerHTML = WORKS.map((work) =>
+    `<span><i style="background:${work.color}"></i>${escapeHtml(work.shortTitle)}</span>`
+  ).join("");
+}
+
 // load the map shapes and the events, then draw the page
 Promise.all([d3.json(WORLD_URL), d3.json("data/events.json")]).then(([world, events]) => {
   setupMap(world);
   prepareEvents(events);
+  renderMapKey();
   svg.call(zoom.transform, overviewTransform());
 });

@@ -197,3 +197,64 @@ a:focus-visible {
   font-size: 18px;
   line-height: 1;
 }
+
+/* map key */
+.map-key {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  max-width: 200px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 0 0 1px var(--rule);
+  font-size: 11.5px;
+  line-height: 1.3;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.map-key > div {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.map-key svg {
+  width: 22px;
+  height: 12px;
+  flex: none;
+}
+
+.map-key .key-title {
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.map-key .key-works {
+  display: grid;
+  gap: 1px;
+  margin: 4px 0 1px;
+  padding-top: 4px;
+  border-top: 1px solid var(--rule);
+}
+
+.map-key .key-works span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.map-key .key-works i {
+  width: 22px;
+  height: 3px;
+  flex: none;
+}
+
+.map-key .key-note {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 11px;
+}
