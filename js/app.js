@@ -220,6 +220,7 @@ function updateControls() {
   play.disabled = state.mode !== "work";
   play.textContent = state.playing ? "Pause" : "Play";
   updateEraTag();
+  updateYearBar();
 }
 
 function step(direction) {
@@ -265,6 +266,38 @@ function updateEraTag() {
   tag.className = "era " + (text.includes("alive") ? "alive" : "after");
 }
 
+// position on the year bar in percent; 1900 to 1952 fills most of the bar, later years share the end
+function yearBarPosition(year) {
+  const start = 1900;
+  const end = 1952;
+  const share = 0.88;
+  if (year <= end) return ((year - start) / (end - start)) * share * 100;
+  return share * 100 + Math.min(1, (year - end) / 75) * (1 - share) * 100;
+}
+
+function setUpYearBar() {
+  const bar = document.querySelector(".year-bar");
+  bar.querySelector(".year-tick").style.left = yearBarPosition(RODIN_DEATH) + "%";
+  bar.querySelector(".label-death").style.left = yearBarPosition(RODIN_DEATH) + "%";
+  bar.querySelector(".label-1950").style.left = yearBarPosition(1950) + "%";
+}
+
+function updateYearBar() {
+  const bar = document.querySelector(".year-bar");
+  const dot = bar.querySelector(".year-dot");
+  const span = bar.querySelector(".year-span");
+  const label = bar.querySelector(".year-now");
+  bar.style.display = state.mode === "work" || state.mode === "period" ? "" : "none";
+
+  if (state.mode === "work") {
+    const e = eventsByWork[state.work].find((x) => x.step === state.step);
+    dot.style.display = "";
+    span.style.display = "none";
+    dot.style.left = yearBarPosition(e.year) + "%";
+    label.textContent = e.date;
+  }
+}
+
 // menu
 document.getElementById("tab-overview").onclick = () => {
   stopPlaying();
@@ -301,5 +334,6 @@ Promise.all([d3.json(WORLD_URL), d3.json("data/events.json")]).then(([world, eve
   setupMap(world);
   prepareEvents(events);
   renderMapKey();
+  setUpYearBar();
   go("overview");
 });

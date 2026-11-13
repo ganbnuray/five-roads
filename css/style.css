@@ -632,3 +632,85 @@ a:focus-visible {
   background: var(--ink);
   color: #fff;
 }
+
+/* year bar above the controls */
+.year-bar {
+  position: absolute;
+  left: 50%;
+  bottom: 76px;
+  transform: translateX(-50%);
+  width: min(440px, 80%);
+  padding: 8px 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 0 0 1px var(--rule);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.year-track {
+  position: relative;
+  height: 6px;
+  margin: 6px 0 4px;
+  border-radius: 3px;
+  background: var(--rule);
+}
+
+.year-span {
+  position: absolute;
+  top: 0;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--button);
+  opacity: 0.35;
+}
+
+.year-tick {
+  position: absolute;
+  top: -5px;
+  width: 2px;
+  height: 16px;
+  background: var(--ink);
+}
+
+.year-dot {
+  position: absolute;
+  top: -5px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  background: var(--button);
+  box-shadow: 0 0 0 1px var(--button);
+  transform: translateX(-50%);
+}
+
+.year-labels {
+  position: relative;
+  height: 16px;
+}
+
+.year-labels span {
+  position: absolute;
+  white-space: nowrap;
+}
+
+.year-labels .label-start {
+  left: 0;
+}
+
+.year-labels .label-death,
+.year-labels .label-1950 {
+  transform: translateX(-50%);
+}
+
+.year-labels .label-later {
+  right: 0;
+}
+
+.year-now {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
