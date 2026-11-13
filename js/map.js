@@ -9,6 +9,13 @@ const baseLayer = svg.append("g"); // land and borders, moved by the zoom
 let projection;
 let currentTransform = d3.zoomIdentity;
 
+const zoom = d3.zoom()
+  .scaleExtent([0.85, 220])
+  .on("zoom", (event) => {
+    currentTransform = event.transform;
+    baseLayer.attr("transform", currentTransform);
+  });
+
 function setupMap(world) {
   const land = topojson.feature(world, world.objects.countries);
   const borders = topojson.mesh(world, world.objects.countries, (a, b) => a !== b);
@@ -40,4 +47,18 @@ function setupMap(world) {
     .attr("stroke", "var(--border)")
     .attr("stroke-width", 0.5)
     .attr("vector-effect", "non-scaling-stroke");
+
+  svg.call(zoom).on("dblclick.zoom", null);
 }
+
+document.getElementById("zoom-in").onclick = () => {
+  svg.transition().duration(300).call(zoom.scaleBy, 1.6);
+};
+
+document.getElementById("zoom-out").onclick = () => {
+  svg.transition().duration(300).call(zoom.scaleBy, 1 / 1.6);
+};
+
+document.getElementById("zoom-reset").onclick = () => {
+  svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity);
+};

@@ -176,3 +176,24 @@ a:focus-visible {
     max-height: none;
   }
 }
+
+.map-buttons {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.map-buttons button {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--paper);
+  box-shadow: 0 0 0 1px var(--border);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+}
