@@ -553,3 +553,65 @@ a:focus-visible {
 .event-list .uncertain .text {
   color: var(--muted);
 }
+
+/* playback controls on the map */
+.btn {
+  white-space: nowrap;
+  border: 1px solid var(--button);
+  border-radius: 999px;
+  background: transparent;
+  padding: 8px 20px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.btn:hover:not(:disabled) {
+  background: #dfe0e5;
+}
+
+.btn.primary {
+  background: var(--button);
+  color: #fff;
+}
+
+.btn.primary:hover {
+  background: #40464d;
+}
+
+.btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.map-controls {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 6px;
+  border-radius: 999px;
+  background: var(--paper);
+  box-shadow: 0 0 0 1px var(--border);
+}
+
+.map-controls .btn {
+  border-color: transparent;
+}
+
+.map-controls .status {
+  min-width: 110px;
+  padding-right: 8px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--muted);
+}

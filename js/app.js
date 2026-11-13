@@ -180,6 +180,7 @@ function go(mode, options = {}) {
   if (options.step != null) state.step = options.step;
   updateTabs();
   renderWorkList();
+  updateControls();
 
   if (mode === "overview" || mode === "quiz") {
     renderOverview();
@@ -200,9 +201,39 @@ function go(mode, options = {}) {
   });
 }
 
+function updateControls() {
+  let status = "";
+  let canGoBack = false;
+  let canGoNext = false;
+  if (state.mode === "work") {
+    const total = eventsByWork[state.work].length;
+    status = `Step ${state.step} of ${total}`;
+    canGoBack = state.step > 1;
+    canGoNext = state.step < total;
+  }
+  document.getElementById("status").textContent = status;
+  document.getElementById("prev").disabled = !canGoBack;
+  document.getElementById("next").disabled = !canGoNext;
+}
+
+function step(direction) {
+  if (state.mode === "work") {
+    const next = state.step + direction;
+    if (next >= 1 && next <= eventsByWork[state.work].length) go("work", { work: state.work, step: next });
+  }
+}
+
 // menu
 document.getElementById("tab-overview").onclick = () => go("overview");
 document.getElementById("tab-work").onclick = () => go("work", { work: state.work, step: state.step });
+
+// back and next buttons, and the arrow keys
+document.getElementById("prev").onclick = () => step(-1);
+document.getElementById("next").onclick = () => step(1);
+document.addEventListener("keydown", (event) => {
+  if (event.key === "ArrowRight") step(1);
+  if (event.key === "ArrowLeft") step(-1);
+});
 
 // load the map shapes and the events, then draw the page
 Promise.all([d3.json(WORLD_URL), d3.json("data/events.json")]).then(([world, events]) => {
