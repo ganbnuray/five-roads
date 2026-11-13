@@ -127,6 +127,7 @@ function drawMap(animate) {
   drawCityLabels();
   const view = buildView(animate);
   view.routes.forEach(drawRoute);
+  if (state.mode !== "work") drawFoundry();
   drawMarkers(view.markers);
 }
 
@@ -243,4 +244,46 @@ function drawMarkers(markers) {
       .attr("opacity", m.faded ? 0.7 : 1);
     dot.append("title").text(work.title + ": " + m.event.place);
   });
+}
+
+function drawFoundry() {
+  const [x, y] = project(FOUNDRY.lon, FOUNDRY.lat);
+  if (x < -20 || x > WIDTH + 20 || y < -20 || y > HEIGHT + 20) return;
+
+  overlay.append("circle")
+    .attr("cx", x)
+    .attr("cy", y)
+    .attr("r", 13)
+    .attr("fill", "none")
+    .attr("stroke", "var(--ink)")
+    .attr("stroke-width", 1.5);
+  overlay.append("circle")
+    .attr("cx", x)
+    .attr("cy", y)
+    .attr("r", 3)
+    .attr("fill", "var(--ink)");
+
+  // the label sits above paris, with a thin line down to the ring
+  const anchor = x > WIDTH - 260 ? "end" : "start";
+  const dx = anchor === "end" ? -30 : 30;
+  const labelY = Math.max(y - 92, 40);
+  overlay.append("path")
+    .attr("d", `M${x + (anchor === "end" ? -9 : 9)},${y - 9} L${x + dx * 0.8},${labelY + 36}`)
+    .attr("stroke", "var(--ink)")
+    .attr("stroke-width", 1)
+    .attr("fill", "none");
+
+  const label = overlay.append("text")
+    .attr("class", "place-label")
+    .attr("x", x + dx)
+    .attr("y", labelY)
+    .attr("text-anchor", anchor)
+    .attr("font-size", 13)
+    .attr("fill", "var(--ink)")
+    .attr("paint-order", "stroke")
+    .attr("stroke", "var(--sea)")
+    .attr("stroke-width", 4);
+  label.append("tspan").attr("font-weight", 700).text(FOUNDRY.name);
+  label.append("tspan").attr("x", x + dx).attr("dy", 16).text(FOUNDRY.note);
+  label.append("tspan").attr("x", x + dx).attr("dy", 16).attr("fill", "var(--muted)").text(FOUNDRY.years);
 }

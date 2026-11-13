@@ -70,3 +70,12 @@ const CITIES = [
   { name: "Williamstown", lat: 42.71, lon: -73.2, dx: 4, dy: -12, anchor: "start" },
   { name: "Atlanta", lat: 33.75, lon: -84.39, dx: 6, dy: -6, anchor: "start" }
 ];
+
+// the foundry where all five works were cast
+const FOUNDRY = {
+  name: "Rudier foundry, Paris",
+  note: "all five works cast here",
+  years: "1904, 1913, ca. 1921 to 1924, 1927, 1929",
+  lat: 48.8636,
+  lon: 2.3637
+};
