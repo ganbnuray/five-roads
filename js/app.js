@@ -10,6 +10,7 @@ const state = {
   work: "thinker",
   step: 1,
   roadOpen: false,
+  playing: null,
 };
 
 let allEvents = [];
@@ -214,25 +215,65 @@ function updateControls() {
   document.getElementById("status").textContent = status;
   document.getElementById("prev").disabled = !canGoBack;
   document.getElementById("next").disabled = !canGoNext;
+
+  const play = document.getElementById("play");
+  play.disabled = state.mode !== "work";
+  play.textContent = state.playing ? "Pause" : "Play";
 }
 
 function step(direction) {
   if (state.mode === "work") {
     const next = state.step + direction;
     if (next >= 1 && next <= eventsByWork[state.work].length) go("work", { work: state.work, step: next });
+    else stopPlaying();
   }
 }
 
+function stopPlaying() {
+  if (!state.playing) return;
+  clearInterval(state.playing);
+  state.playing = null;
+  updateControls();
+}
+
+function togglePlay() {
+  if (state.playing) {
+    stopPlaying();
+    return;
+  }
+  state.playing = setInterval(() => step(1), 4200);
+  updateControls();
+}
+
 // menu
-document.getElementById("tab-overview").onclick = () => go("overview");
-document.getElementById("tab-work").onclick = () => go("work", { work: state.work, step: state.step });
+document.getElementById("tab-overview").onclick = () => {
+  stopPlaying();
+  go("overview");
+};
+document.getElementById("tab-work").onclick = () => {
+  stopPlaying();
+  go("work", { work: state.work, step: state.step });
+};
 
 // back and next buttons, and the arrow keys
-document.getElementById("prev").onclick = () => step(-1);
-document.getElementById("next").onclick = () => step(1);
+document.getElementById("prev").onclick = () => {
+  stopPlaying();
+  step(-1);
+};
+document.getElementById("next").onclick = () => {
+  stopPlaying();
+  step(1);
+};
+document.getElementById("play").onclick = togglePlay;
 document.addEventListener("keydown", (event) => {
-  if (event.key === "ArrowRight") step(1);
-  if (event.key === "ArrowLeft") step(-1);
+  if (event.key === "ArrowRight") {
+    stopPlaying();
+    step(1);
+  }
+  if (event.key === "ArrowLeft") {
+    stopPlaying();
+    step(-1);
+  }
 });
 
 // load the map shapes and the events, then draw the page
