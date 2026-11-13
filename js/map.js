@@ -154,6 +154,9 @@ function drawRoute(route) {
     .attr("stroke-linecap", "round")
     .attr("stroke-width", ROUTE_WIDTH[route.style])
     .attr("opacity", ROUTE_OPACITY[route.style]);
+
+  // a dashed line means the move is inferred or uncertain
+  if (route.segment.to.uncertain) path.attr("stroke-dasharray", "7 6");
   drawArrow(path, color, true);
 }
 
