@@ -123,8 +123,11 @@ function curvePath(a, b) {
 function drawMap(animate) {
   overlay.selectAll("*").remove();
   if (allEvents.length === 0) return; // data is still loading
+  drawOceanLabel();
+  drawCityLabels();
   const view = buildView(animate);
   view.routes.forEach(drawRoute);
+  drawMarkers(view.markers);
 }
 
 // decide which routes, markers and labels to show for the current mode
@@ -136,6 +139,8 @@ function buildView(animate) {
     segmentsByWork[work.id].forEach((segment) => {
       view.routes.push({ work: work.id, segment, style: "solid" });
     });
+    const placed = eventsByWork[work.id].filter((e) => e.hasPlace);
+    view.markers.push({ work: work.id, event: placed[placed.length - 1], size: 6 });
   });
   return view;
 }
@@ -173,4 +178,69 @@ function drawArrow(path, color, small) {
     .attr("d", `M0,0 L${-size * 1.6},${-size * 0.75} L${-size * 1.6},${size * 0.75} Z`)
     .attr("fill", color)
     .attr("transform", `translate(${tip.x},${tip.y}) rotate(${angle})`);
+}
+
+function drawOceanLabel() {
+  if (currentTransform.k >= 4) return;
+  const [x, y] = project(-42, 37);
+  overlay.append("text")
+    .attr("x", x)
+    .attr("y", y)
+    .attr("text-anchor", "middle")
+    .attr("fill", "var(--muted)")
+    .attr("font-style", "italic")
+    .attr("font-size", 14)
+    .attr("opacity", 0.8)
+    .text("Atlantic Ocean");
+}
+
+function drawCityLabels() {
+  CITIES.forEach((city) => {
+    const [x, y] = project(city.lon, city.lat);
+    // skip cities that are far off screen
+    if (x < -50 || x > WIDTH + 50 || y < -50 || y > HEIGHT + 50) return;
+    overlay.append("text")
+      .attr("class", "city")
+      .attr("x", x + city.dx)
+      .attr("y", y + city.dy)
+      .attr("text-anchor", city.anchor)
+      .attr("fill", "var(--muted)")
+      .attr("font-size", currentTransform.k > 30 ? 15 : 12)
+      .attr("font-weight", 600)
+      .attr("paint-order", "stroke")
+      .attr("stroke", "var(--sea)")
+      .attr("stroke-width", 3)
+      .text(city.name);
+  });
+}
+
+function drawMarkers(markers) {
+  // spread out markers that sit on the same spot
+  const groups = {};
+  markers.forEach((m) => {
+    m.point = project(m.event.lon, m.event.lat);
+    const key = Math.round(m.point[0] / 6) + "," + Math.round(m.point[1] / 6);
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(m);
+  });
+  Object.values(groups).forEach((group) => {
+    if (group.length < 2) return;
+    group.forEach((m, i) => {
+      const angle = (i / group.length) * 2 * Math.PI - Math.PI / 2;
+      m.point = [m.point[0] + Math.cos(angle) * 10, m.point[1] + Math.sin(angle) * 10];
+    });
+  });
+
+  markers.forEach((m) => {
+    const work = WORKS_BY_ID[m.work];
+    const dot = overlay.append("circle")
+      .attr("cx", m.point[0])
+      .attr("cy", m.point[1])
+      .attr("r", m.size)
+      .attr("fill", work.color)
+      .attr("stroke", "var(--paper)")
+      .attr("stroke-width", 2)
+      .attr("opacity", m.faded ? 0.7 : 1);
+    dot.append("title").text(work.title + ": " + m.event.place);
+  });
 }

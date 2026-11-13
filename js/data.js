@@ -59,3 +59,14 @@ const WORKS = [
     museumPage: "https://www.famsf.org/artworks/tiger-love"
   }
 ];
+
+// city names drawn on the map; dx, dy and anchor place the name next to the dot
+const CITIES = [
+  { name: "Paris", lat: 48.86, lon: 2.35, dx: 6, dy: -6, anchor: "start" },
+  { name: "San Francisco", lat: 37.77, lon: -122.42, dx: -8, dy: -8, anchor: "end" },
+  { name: "New York", lat: 40.71, lon: -74.0, dx: 8, dy: 14, anchor: "start" },
+  { name: "Buffalo", lat: 42.89, lon: -78.88, dx: -6, dy: -6, anchor: "end" },
+  { name: "San Diego", lat: 32.72, lon: -117.16, dx: 8, dy: 12, anchor: "start" },
+  { name: "Williamstown", lat: 42.71, lon: -73.2, dx: 4, dy: -12, anchor: "start" },
+  { name: "Atlanta", lat: 33.75, lon: -84.39, dx: 6, dy: -6, anchor: "start" }
+];
