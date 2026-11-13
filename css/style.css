@@ -822,3 +822,53 @@ a:focus-visible {
   color: #8e1c1c;
   font-weight: 600;
 }
+
+/* smaller screens */
+@media (max-width: 980px) {
+  .mapbox,
+  #map {
+    min-height: 360px;
+  }
+
+  .tabs {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  .title {
+    grid-template-columns: 1fr;
+  }
+
+  .hero {
+    max-width: 420px;
+  }
+}
+
+@media (max-width: 800px) {
+  .work-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .map-controls .status,
+  .map-key .key-note {
+    display: none;
+  }
+
+  .map-controls {
+    bottom: 8px;
+  }
+
+  .year-bar {
+    bottom: 68px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
