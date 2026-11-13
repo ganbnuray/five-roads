@@ -125,3 +125,54 @@ a:focus-visible {
   font-size: 17px;
   line-height: 1.6;
 }
+
+/* map and side panel */
+.main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 420px;
+  gap: 24px;
+  align-items: stretch;
+}
+
+.mapbox {
+  position: relative;
+  background: var(--sea);
+  overflow: hidden;
+  min-height: min(660px, calc(100vh - 160px));
+}
+
+#map {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 420px;
+  cursor: grab;
+}
+
+#map:active {
+  cursor: grabbing;
+}
+
+#map text {
+  font-family: var(--font);
+}
+
+.panel {
+  background: var(--paper);
+  padding: 28px;
+  overflow: auto;
+  max-height: max(660px, calc(100vh - 160px));
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (max-width: 980px) {
+  .main {
+    grid-template-columns: 1fr;
+  }
+
+  .panel {
+    max-height: none;
+  }
+}
