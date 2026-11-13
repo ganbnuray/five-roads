@@ -98,3 +98,97 @@ const STATUS_LABELS = {
 // key dates as decimal years, used by the era tag and the year bar
 const RODIN_DEATH = 1917.88; // november 17, 1917
 const PUTNAM_DEATH = 1930.4; // 1930
+
+// the seven periods for "by period" mode
+const PERIODS = [
+  {
+    start: 1900,
+    end: 1913,
+    years: "1904 to 1913",
+    title: "Copies Rodin approved",
+    text: "Rodin is alive and sells bronzes of his own models, but he does not pour them. Each one is cast from a plaster mold at the Rudier foundry in Paris, so even these lifetime bronzes are copies he approved. The Thinker is cast around 1904 and The Prodigal Son in 1913. In San Francisco, Arthur Putnam's plaster models are fragile: the 1906 earthquake destroys many of them, and a 1911 surgery ends his career.",
+    world: [
+      { date: "ca. 1900", text: "Rodin gives the Rudier foundry the sole right to cast his bronzes" },
+      { date: "1906", text: "Earthquake and fire destroy much of San Francisco, and many of Putnam's models" },
+      { date: "1911", text: "Surgery leaves Putnam partly paralyzed and ends his career" }
+    ]
+  },
+  {
+    start: 1914,
+    end: 1918,
+    years: "1914 to 1918",
+    title: "War, the fair and Rodin's gift to France",
+    text: "War makes every crossing a risk, yet France still sends art to San Francisco's fair. Loïe Fuller ships two of these casts herself and sells them to Alma there. In 1916, in the middle of the war, Rodin gives France his works and the right to cast them. When he dies in November 1917, his bronzes do not stop: the right to make them now belongs to the state.",
+    world: [
+      { date: "Dec 1914", text: "A government memo lets Fuller export five Rodin works" },
+      { date: "1915", text: "Panama Pacific International Exposition, February 20 to December 4" },
+      { date: "Dec 1916", text: "A French law accepts Rodin's gift of his works and casting rights" },
+      { date: "Nov 1917", text: "Rodin dies at Meudon" },
+      { date: "Nov 1918", text: "Armistice ends the war" }
+    ]
+  },
+  {
+    start: 1919,
+    end: 1929,
+    years: "1919 to 1929",
+    title: "After Rodin: the state keeps casting",
+    text: "The Musée Rodin opens in 1919 and pays for itself by ordering new casts from Rodin's molds at the same foundry. Faun and Nymph and Polyphemus and Acis are made this way, as new works by a dead artist. In 1921 Alma uses the same method for a living one: she buys Putnam's plasters and pays Rudier to cast them in bronze, with Putnam there to supervise. On Armistice Day 1924 the Legion opens, and The Thinker is her gift.",
+    world: [
+      { date: "1919", text: "The Musée Rodin opens in Paris and starts to sell new casts" },
+      { date: "1921", text: "Putnam moves to France to supervise his castings" },
+      { date: "Nov 1924", text: "The Legion of Honor opens on Armistice Day" },
+      { date: "Oct 1929", text: "The Wall Street crash" }
+    ]
+  },
+  {
+    start: 1930,
+    end: 1939,
+    years: "1930 to 1939",
+    title: "The Depression: more copies than buyers",
+    text: "New casts are easy to make but hard to sell. Faun and Nymph goes to auction at the Hôtel Drouot in 1933, when its owner's collection is broken up. Polyphemus and Acis crosses to a New York dealer in 1935 with seven other new casts from Rudier, and even a museum show in Buffalo finds no buyer. In the same years, Walter Benjamin writes that mechanical reproduction strips art of its aura.",
+    world: [
+      { date: "1930", text: "Arthur Putnam dies in France" },
+      { date: "May 1933", text: "The Danthon collection is sold at the Hôtel Drouot" },
+      { date: "Dec 1935", text: "Eight new Rodin casts reach Jacques Seligmann & Co., New York" },
+      { date: "1935 to 1936", text: "Benjamin writes \"The Work of Art in the Age of Mechanical Reproduction\"" },
+      { date: "Sept 1939", text: "World War II begins in Europe" }
+    ]
+  },
+  {
+    start: 1940,
+    end: 1945,
+    years: "1940 to 1945",
+    title: "World War II: bronze as metal",
+    text: "In occupied France, bronze becomes raw metal again. From October 1941 the Vichy government melts between about 1,500 and 1,750 public bronze statues for the German war industry, while Eugène Rudier takes orders from German officials and sells Musée Rodin bronzes. Across the Atlantic, his unsold casts pass to an agent in New York. In San Francisco, Alma turns long loans into gifts: The Prodigal Son in 1940 and Faun and Nymph in 1942.",
+    world: [
+      { date: "June 1940", text: "Germany occupies Paris" },
+      { date: "Oct 1941", text: "A Vichy law orders public bronze statues taken down and melted" },
+      { date: "May 1942", text: "Rudier attends a Musée Rodin reception for Hitler's sculptor Arno Breker, whose bronzes he casts" },
+      { date: "1945", text: "The war ends" }
+    ]
+  },
+  {
+    start: 1946,
+    end: 1950,
+    years: "1946 to 1950",
+    title: "After the war: the last copy finds a buyer",
+    text: "In March 1949 a letter in the dealer's files mentions a chance to sell Rudier's bronzes in California. That October Alma buys them from Rudier, and in 1950 Polyphemus and Acis joins the Legion. All five casts now belong to the museum.",
+    world: [
+      { date: "Mar 1949", text: "Seligman writes of a possible buyer in California" },
+      { date: "Oct 1949", text: "Alma buys a group of casts from Rudier" }
+    ]
+  },
+  {
+    start: 1951,
+    end: 2025,
+    years: "1951 to today",
+    title: "Afterlife: a limit on copies",
+    text: "The Musée Rodin keeps casting, but in 1956 French law caps each work at twelve casts per size. The five works stay in San Francisco, yet still travel as loans: The Prodigal Son appears in the Jewel City show in 2015, then tours to Williamstown and Atlanta in 2022.",
+    world: [
+      { date: "1956", text: "French law limits each Rodin model to twelve casts per size" },
+      { date: "1968", text: "Alma de Bretteville Spreckels dies" },
+      { date: "1972", text: "The Legion and the de Young become the Fine Arts Museums of San Francisco" },
+      { date: "2022", text: "Rodin in the United States tours Williamstown and Atlanta" }
+    ]
+  }
+];
