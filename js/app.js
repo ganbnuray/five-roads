@@ -71,6 +71,28 @@ function renderWorkList() {
     </button>`).join("");
 }
 
+const panel = document.getElementById("panel");
+
+// the title inside a tombstone is set in italics
+function tombstoneHtml(work) {
+  const title = escapeHtml(work.title);
+  return escapeHtml(work.tombstone).replace(title, `<i>${title}</i>`);
+}
+
+function renderOverview() {
+  const items = WORKS.map((work) => `
+    <li>
+      <button class="work-title" data-follow="${work.id}">${escapeHtml(work.title)}</button>
+      <p class="cast">${escapeHtml(work.cast)}</p>
+      <p class="small">${escapeHtml(work.summary)}</p>
+      <div class="tomb">${tombstoneHtml(work)}</div>
+      <div class="links">
+        <a href="${work.museumPage}"><span aria-hidden="true">&rarr;</span> Museum record</a>
+      </div>
+    </li>`).join("");
+  panel.innerHTML = `<h2>Five works, one museum</h2><ul class="works">${items}</ul>`;
+}
+
 // load the map shapes and the events, then draw the page
 Promise.all([d3.json(WORLD_URL), d3.json("data/events.json")]).then(([world, events]) => {
   setupMap(world);
@@ -78,4 +100,5 @@ Promise.all([d3.json(WORLD_URL), d3.json("data/events.json")]).then(([world, eve
   renderMapKey();
   svg.call(zoom.transform, overviewTransform());
   renderWorkList();
+  renderOverview();
 });
