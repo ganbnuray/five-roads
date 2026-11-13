@@ -129,6 +129,7 @@ function drawMap(animate) {
   view.routes.forEach(drawRoute);
   if (state.mode !== "work") drawFoundry();
   drawMarkers(view.markers);
+  hideOverlappingCityLabels();
 }
 
 // decide which routes, markers and labels to show for the current mode
@@ -286,4 +287,17 @@ function drawFoundry() {
   label.append("tspan").attr("font-weight", 700).text(FOUNDRY.name);
   label.append("tspan").attr("x", x + dx).attr("dy", 16).text(FOUNDRY.note);
   label.append("tspan").attr("x", x + dx).attr("dy", 16).attr("fill", "var(--muted)").text(FOUNDRY.years);
+}
+
+// drop a city name when it collides with a place label
+function hideOverlappingCityLabels() {
+  const boxes = overlay.selectAll("text.place-label").nodes().map((node) => node.getBBox());
+  overlay.selectAll("text.city").each(function () {
+    const b = this.getBBox();
+    const overlaps = boxes.some((p) =>
+      b.x < p.x + p.width + 4 && b.x + b.width + 4 > p.x &&
+      b.y < p.y + p.height + 2 && b.y + b.height + 2 > p.y
+    );
+    if (overlaps) this.remove();
+  });
 }
