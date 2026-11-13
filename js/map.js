@@ -9,6 +9,7 @@ const overlay = svg.append("g"); // routes and labels, redrawn after every zoom
 
 let projection;
 let currentTransform = d3.zoomIdentity;
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const zoom = d3.zoom()
   .scaleExtent([0.85, 220])
@@ -104,6 +105,21 @@ function overviewTransform() {
   return fitToEvents(allEvents, 1);
 }
 
+// glide the map to a new view, then run "then"
+function moveMapTo(transform, then) {
+  if (reduceMotion) {
+    svg.call(zoom.transform, transform);
+    if (then) then();
+    return;
+  }
+  svg.transition()
+    .duration(850)
+    .call(zoom.transform, transform)
+    .on("end", () => {
+      if (then) then();
+    });
+}
+
 // turn a longitude and latitude into a point on screen, after zoom
 function project(lon, lat) {
   const [x, y] = projection([lon, lat]);
@@ -129,12 +145,14 @@ function drawMap(animate) {
   view.routes.forEach(drawRoute);
   if (state.mode !== "work") drawFoundry();
   drawMarkers(view.markers);
+  drawPlaceLabels(view.labels);
   hideOverlappingCityLabels();
 }
 
 // decide which routes, markers and labels to show for the current mode
 function buildView(animate) {
   const view = { routes: [], markers: [], labels: [] };
+  if (state.mode === "work") return buildWorkView(view, animate);
 
   // overview: every route, and a marker where each work ends up
   WORKS.forEach((work) => {
@@ -144,6 +162,38 @@ function buildView(animate) {
     const placed = eventsByWork[work.id].filter((e) => e.hasPlace);
     view.markers.push({ work: work.id, event: placed[placed.length - 1], size: 6 });
   });
+  return view;
+}
+
+function buildWorkView(view, animate) {
+  const events = eventsByWork[state.work];
+  const current = events.find((e) => e.step === state.step);
+
+  segmentsByWork[state.work].forEach((segment) => {
+    let style = "future";
+    if (segment.to.step < state.step) style = "solid";
+    // a step at sea belongs to the segment it crosses
+    if (segment.to.step === state.step || (!current.hasPlace && segment.sea === current)) style = "now";
+    view.routes.push({ work: state.work, segment, style });
+  });
+
+  // the other works stay faintly in the background
+  WORKS.filter((work) => work.id !== state.work).forEach((work) => {
+    segmentsByWork[work.id].forEach((segment) => {
+      view.routes.push({ work: work.id, segment, style: "ghost" });
+    });
+  });
+
+  events.filter((e) => e.hasPlace && e.step < state.step).forEach((e) => {
+    view.markers.push({ work: state.work, event: e, size: 3.5, faded: true });
+  });
+
+  // a step at sea has no place, so point at the next place instead
+  const here = current.hasPlace ? current : events.find((e) => e.step > state.step && e.hasPlace);
+  if (here) {
+    view.markers.push({ work: state.work, event: here, size: current.hasPlace ? 8 : 6, ring: true });
+    view.labels.push(here);
+  }
   return view;
 }
 
@@ -162,9 +212,14 @@ function drawRoute(route) {
     .attr("stroke-width", ROUTE_WIDTH[route.style])
     .attr("opacity", ROUTE_OPACITY[route.style]);
 
-  // a dashed line means the move is inferred or uncertain
-  if (route.segment.to.uncertain) path.attr("stroke-dasharray", "7 6");
-  drawArrow(path, color, true);
+  // dotted for steps still to come, dashed for uncertain moves
+  if (route.style === "future") {
+    path.attr("stroke-dasharray", "2 5");
+  } else if (route.segment.to.uncertain) {
+    path.attr("stroke-dasharray", "7 6");
+  }
+  if (route.style === "now" || route.style === "solid") drawArrow(path, color, route.style === "solid");
+  if (route.style === "now" && route.segment.sea) drawSeaLabel(path);
 }
 
 // a small arrowhead at the end of a route
@@ -180,6 +235,22 @@ function drawArrow(path, color, small) {
     .attr("d", `M0,0 L${-size * 1.6},${-size * 0.75} L${-size * 1.6},${size * 0.75} Z`)
     .attr("fill", color)
     .attr("transform", `translate(${tip.x},${tip.y}) rotate(${angle})`);
+}
+
+// sea crossings have no recorded route, so say so on the line
+function drawSeaLabel(path) {
+  const node = path.node();
+  const middle = node.getPointAtLength(node.getTotalLength() / 2);
+  overlay.append("text")
+    .attr("x", middle.x)
+    .attr("y", middle.y - 10)
+    .attr("text-anchor", "middle")
+    .attr("font-size", 12.5)
+    .attr("fill", "var(--ink)")
+    .attr("paint-order", "stroke")
+    .attr("stroke", "var(--sea)")
+    .attr("stroke-width", 4)
+    .text("Atlantic crossing, route not recorded");
 }
 
 function drawOceanLabel() {
@@ -244,6 +315,8 @@ function drawMarkers(markers) {
       .attr("stroke-width", 2)
       .attr("opacity", m.faded ? 0.7 : 1);
     dot.append("title").text(work.title + ": " + m.event.place);
+    dot.style("cursor", "pointer")
+      .on("click", () => go("work", { work: m.work, step: m.event.step }));
   });
 }
 
@@ -287,6 +360,43 @@ function drawFoundry() {
   label.append("tspan").attr("font-weight", 700).text(FOUNDRY.name);
   label.append("tspan").attr("x", x + dx).attr("dy", 16).text(FOUNDRY.note);
   label.append("tspan").attr("x", x + dx).attr("dy", 16).attr("fill", "var(--muted)").text(FOUNDRY.years);
+}
+
+function drawPlaceLabels(events) {
+  const used = [];
+  events.forEach((e) => {
+    const [x, pointY] = project(e.lon, e.lat);
+
+    // move a label down if another label is already there
+    let y = pointY + 22;
+    while (used.some(([ux, uy]) => Math.abs(ux - x) < 120 && Math.abs(uy - y) < 16)) y += 16;
+    used.push([x, y]);
+
+    // keep labels near the edges inside the map
+    let anchor = "middle";
+    let labelX = x;
+    if (x < 220) {
+      anchor = "start";
+      labelX = Math.max(x - 8, 8);
+    } else if (x > WIDTH - 220) {
+      anchor = "end";
+      labelX = Math.min(x + 8, WIDTH - 8);
+    }
+
+    const text = e.place.length > 48 ? e.place.slice(0, 46) + "…" : e.place;
+    overlay.append("text")
+      .attr("class", "place-label")
+      .attr("x", labelX)
+      .attr("y", y)
+      .attr("text-anchor", anchor)
+      .attr("font-size", 13)
+      .attr("font-weight", 700)
+      .attr("fill", "var(--ink)")
+      .attr("paint-order", "stroke")
+      .attr("stroke", "var(--sea)")
+      .attr("stroke-width", 4)
+      .text(text);
+  });
 }
 
 // drop a city name when it collides with a place label

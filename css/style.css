@@ -416,3 +416,17 @@ a:focus-visible {
 .links button:hover {
   text-decoration: underline;
 }
+
+/* one step of a work */
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.step .what {
+  font-size: 21px;
+  line-height: 1.3;
+  font-weight: 500;
+}

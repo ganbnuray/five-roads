@@ -7,6 +7,8 @@ const WORKS_BY_ID = Object.fromEntries(WORKS.map((work) => [work.id, work]));
 // what the page is showing right now
 const state = {
   mode: "overview",
+  work: "thinker",
+  step: 1,
 };
 
 let allEvents = [];
@@ -69,6 +71,9 @@ function renderWorkList() {
       <span class="arrow" aria-hidden="true">&rarr;</span>
       <span class="name">${escapeHtml(work.title)}</span>
     </button>`).join("");
+  list.querySelectorAll("[data-work]").forEach((button) => {
+    button.onclick = () => go("work", { work: button.dataset.work, step: 1 });
+  });
 }
 
 const panel = document.getElementById("panel");
@@ -87,18 +92,77 @@ function renderOverview() {
       <p class="small">${escapeHtml(work.summary)}</p>
       <div class="tomb">${tombstoneHtml(work)}</div>
       <div class="links">
+        <button data-follow="${work.id}"><span aria-hidden="true">&rarr;</span> Follow this work</button>
         <a href="${work.museumPage}"><span aria-hidden="true">&rarr;</span> Museum record</a>
       </div>
     </li>`).join("");
   panel.innerHTML = `<h2>Five works, one museum</h2><ul class="works">${items}</ul>`;
+  panel.querySelectorAll("[data-follow]").forEach((button) => {
+    button.onclick = () => go("work", { work: button.dataset.follow, step: 1 });
+  });
 }
+
+function renderWork() {
+  const work = WORKS_BY_ID[state.work];
+  const events = eventsByWork[state.work];
+  const e = events.find((x) => x.step === state.step);
+  panel.innerHTML = `
+    <div>
+      <h2><i>${escapeHtml(work.title)}</i></h2>
+      <p class="cast">${escapeHtml(work.cast)}</p>
+    </div>
+    <div class="step">
+      <p class="where">Step ${e.step} of ${events.length}, ${escapeHtml(e.date)}</p>
+      <p class="what">${escapeHtml(e.what)}.</p>
+    </div>
+    <p class="small"><a href="${work.museumPage}">See the museum record</a></p>`;
+}
+
+function updateTabs() {
+  ["overview", "period", "work", "quiz"].forEach((mode) => {
+    document.getElementById("tab-" + mode).setAttribute("aria-pressed", String(state.mode === mode));
+  });
+}
+
+// the previous place, the current place, and the next place if this step is at sea
+function workStepPoints() {
+  const events = eventsByWork[state.work];
+  const current = events.find((e) => e.step === state.step);
+  const previous = events.filter((e) => e.step < state.step && e.hasPlace).pop();
+  const next = current.hasPlace ? null : events.find((e) => e.step > state.step && e.hasPlace);
+  return [previous, current, next];
+}
+
+// switch to a mode, then move the map and redraw
+function go(mode, options = {}) {
+  state.mode = mode;
+  if (options.work) state.work = options.work;
+  if (options.step != null) state.step = options.step;
+  updateTabs();
+  renderWorkList();
+
+  if (mode === "overview" || mode === "quiz") {
+    renderOverview();
+    moveMapTo(overviewTransform(), () => drawMap(false));
+    return;
+  }
+
+  let target;
+  if (mode === "work") {
+    renderWork();
+    target = fitToEvents(workStepPoints(), 0.12);
+  }
+  moveMapTo(target, () => drawMap(false));
+}
+
+// menu
+document.getElementById("tab-overview").onclick = () => go("overview");
+document.getElementById("tab-work").onclick = () => go("work", { work: state.work, step: state.step });
 
 // load the map shapes and the events, then draw the page
 Promise.all([d3.json(WORLD_URL), d3.json("data/events.json")]).then(([world, events]) => {
   setupMap(world);
   prepareEvents(events);
   renderMapKey();
-  svg.call(zoom.transform, overviewTransform());
-  renderWorkList();
-  renderOverview();
+  go("overview");
 });
